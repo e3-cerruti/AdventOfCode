@@ -32,7 +32,7 @@ def transfer(body, delta):
     return
 
 
-with open('Day06.dat') as orbit_file:
+with open('day_06.dat') as orbit_file:
     orbits = [orbit.rstrip().split(')') for orbit in orbit_file]
 
 for orbit in orbits:
