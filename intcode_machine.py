@@ -23,12 +23,16 @@ class IntcodeMachine:
     def load_program(self, program):
         self.program = program
 
-    def load_program_from_file(self, fileName):
+    @staticmethod
+    def get_program_from_file(file_name):
         program = []
-        with open(fileName) as program_file:
+        with open(file_name) as program_file:
             for line in program_file:
                 program.extend([int(i) for i in line.strip().split(',')])
-        self.load_program(program)
+        return program
+
+    def load_program_from_file(self, fileName):
+        self.load_program(self.get_program_from_file(fileName))
 
     def add(self, args):
         self.program[args[2]] = self.program[args[0]] + self.program[args[1]]
