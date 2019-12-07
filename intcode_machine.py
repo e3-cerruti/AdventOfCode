@@ -1,3 +1,6 @@
+import threading
+
+
 class IntcodeMachine:
     def __init__(self, input_queue=None, output_queue=None):
         self.halted = False
@@ -68,6 +71,7 @@ class IntcodeMachine:
 
     def halt(self, _1):
         self.halted = True
+
 
     def decode(self, opcode):
         code = opcode % 100
