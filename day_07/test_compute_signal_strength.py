@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from day_07 import init_amplifiers, compute_signal_strength
-from intcode_machine import IntcodeMachine
+from day_07.day_07 import init_amplifiers, compute_signal_strength
+from day_07.intcode_machine import IntcodeMachine
 
 
 class TestComputeSignalStrength(TestCase):
