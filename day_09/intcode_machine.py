@@ -1,6 +1,3 @@
-import threading
-
-
 class IntcodeMachine:
     def __init__(self, input_queue=None, output_queue=None):
         self.halted = False
@@ -13,18 +10,21 @@ class IntcodeMachine:
             6: [self.jump_if_false, 2],
             7: [self.less_than, 3],
             8: [self.equals, 3],
+            9: [self.change_relative_base, 1],
             99: [self.halt, 0],
         }
         self.instruction_pointer = 0
+        self.relative_base = 0
         self.program = None
-        self.set_queues(input_queue, output_queue)
+        self.input_queue = input_queue
+        self.output_queue = output_queue
 
     def set_queues(self, input_queue, output_queue):
         self.input_queue = input_queue
         self.output_queue = output_queue
 
     def load_program(self, program):
-        self.program = program
+        self.program = {k: v for k, v in enumerate(program)}
 
     @staticmethod
     def get_program_from_file(file_name):
@@ -34,40 +34,43 @@ class IntcodeMachine:
                 program.extend([int(i) for i in line.strip().split(',')])
         return program
 
-    def load_program_from_file(self, fileName):
-        self.load_program(self.get_program_from_file(fileName))
+    def load_program_from_file(self, file_name):
+        self.load_program(self.get_program_from_file(file_name))
 
     def add(self, args):
-        self.program[args[2]] = self.program[args[0]] + self.program[args[1]]
+        self.program[args[2]] = self.program.get(args[0], 0) + self.program.get(args[1], 0)
 
     def multiply(self, args):
-        self.program[args[2]] = self.program[args[0]] * self.program[args[1]]
+        self.program[args[2]] = self.program.get(args[0], 0) * self.program.get(args[1], 0)
 
     def read(self, args):
         self.program[args[0]] = self.input_queue.get()
 
     def write(self, args):
-        self.output_queue.put(self.program[args[0]])
+        self.output_queue.put(self.program.get(args[0], 0))
 
     def jump_if_true(self, args):
-        if self.program[args[0]]:
-            self.instruction_pointer = self.program[args[1]]
+        if self.program.get(args[0], 0):
+            self.instruction_pointer = self.program.get(args[1], 0)
 
     def jump_if_false(self, args):
-        if not self.program[args[0]]:
-            self.instruction_pointer = self.program[args[1]]
+        if not self.program.get(args[0], 0):
+            self.instruction_pointer = self.program.get(args[1], 0)
 
     def less_than(self, args):
-        if self.program[args[0]] < self.program[args[1]]:
+        if self.program.get(args[0], 0) < self.program.get(args[1], 0):
             self.program[args[2]] = 1
         else:
             self.program[args[2]] = 0
 
     def equals(self, args):
-        if self.program[args[0]] == self.program[args[1]]:
+        if self.program.get(args[0], 0) == self.program.get(args[1], 0):
             self.program[args[2]] = 1
         else:
             self.program[args[2]] = 0
+
+    def change_relative_base(self, args):
+        self.relative_base += self.program.get(args[0], 0)
 
     def halt(self, _1):
         self.halted = True
@@ -91,8 +94,11 @@ class IntcodeMachine:
             parameters = []
             for mode in parameter_modes:
                 self.instruction_pointer += 1
-                if mode:
+                if mode == 1:
                     parameters.append(self.instruction_pointer)
+                elif mode == 2:
+                    relative_mode_parameter = self.relative_base + self.program.get(self.instruction_pointer, 0)
+                    parameters.append(relative_mode_parameter)
                 else:
                     parameters.append(self.program[self.instruction_pointer])
 
