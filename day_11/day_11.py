@@ -1,7 +1,7 @@
 import queue
 from threading import Thread
 
-from intcode_machine import IntcodeMachine
+from intcode_machine.intcode_machine import IntcodeMachine
 
 x = y = 0
 direction = 0
@@ -23,12 +23,13 @@ def down():
 
 def right():
     global x
-    x += 1;
+    x += 1
 
 
 def left():
     global x
     x -= 1
+
 
 move = {
     0: up,
@@ -41,7 +42,6 @@ input_queue = queue.Queue()
 output_queue = queue.Queue()
 computer = IntcodeMachine(input_queue, output_queue)
 computer.load_program_from_file('paint.dat')
-
 
 input_queue.put(hull.get((0, 0)))
 
@@ -86,4 +86,3 @@ for y in range(max_y, min_y - 1, -1):
         else:
             print(' ', end='')
     print()
-
